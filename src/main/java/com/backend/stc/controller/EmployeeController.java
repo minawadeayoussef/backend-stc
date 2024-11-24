@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/v1/employees")
@@ -32,9 +33,14 @@ public class EmployeeController
     }
     @PostMapping
     public ResponseEntity<Employee> createEmployee(@Valid @RequestBody Employee employee) {
-        Employee createdEmployee = employeeService.createEmployee(employee);
+        CompletableFuture<Employee> createdEmployeeFuture = employeeService.createEmployee(employee);
+
+        // Blocking call to wait for the result (you can use .join() to block until the result is available)
+        Employee createdEmployee = createdEmployeeFuture.join();
+
         return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {

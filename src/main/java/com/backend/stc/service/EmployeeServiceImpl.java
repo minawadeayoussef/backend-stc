@@ -9,10 +9,12 @@ import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -33,16 +35,15 @@ public class EmployeeServiceImpl implements EmployeeService {
     @CircuitBreaker(name = "default", fallbackMethod = "fallbackMethod")
     @Retry(name = "default", fallbackMethod = "retryFallback")
     @RateLimiter(name = "default", fallbackMethod = "rateLimiterFallback")
-    public Employee createEmployee(Employee employee) {
+    @Async("virtualThreadExecutor")
+    public CompletableFuture<Employee> createEmployee(Employee employee) {
         // Validate department before saving employee
         if (!departmentValidationService.validateDepartment(employee.getDepartment())) {
             throw new IllegalArgumentException("Invalid department: " + employee.getDepartment());
         }
 
-        // Save the employee to the database
         Employee savedEmployee = employeeRepository.save(employee);
 
-        // Dynamically create the email subject and body
         String emailSubject = "Welcome to the company, " + savedEmployee.getFirstName() + "!";
         String emailBody = "Dear " + savedEmployee.getFirstName() + " " + savedEmployee.getLastName() + ",\n\n" +
                 "Welcome aboard! We are excited to have you as part of our team in the " + savedEmployee.getDepartment() + " department.\n\n" +
@@ -54,7 +55,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         EmailRequest emailRequest = new EmailRequest(savedEmployee.getEmail(), emailSubject, emailBody);
         emailNotificationService.sendEmail(emailRequest);
 
-        return savedEmployee;
+        return CompletableFuture.completedFuture(savedEmployee);
     }
 
     @Override
