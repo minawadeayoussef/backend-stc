@@ -3,7 +3,6 @@ package com.backend.stc.controller;
 
 import com.backend.stc.exception.EmployeeNotFoundException;
 import com.backend.stc.model.Employee;
-import com.backend.stc.service.EmailNotificationServiceImpl;
 import com.backend.stc.service.EmployeeService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @RestController

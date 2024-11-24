@@ -1,9 +1,7 @@
 package com.backend.stc.service;
 
 import com.backend.stc.dto.EmailRequest;
-import com.backend.stc.exception.EmployeeNotFoundException;
 import com.backend.stc.exception.InvalidInputException;
-import com.backend.stc.model.Employee;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.mail.internet.MimeMessage;
@@ -14,7 +12,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -36,6 +33,7 @@ public class EmailNotificationServiceImpl implements EmailNotificationService
         // Validate emailRequest
         validateEmailRequest(emailRequest);
 
+        // Return a CompletableFuture<Void> that runs asynchronously
         return CompletableFuture.runAsync(() -> {
             try {
                 // Create MimeMessage and helper
@@ -60,6 +58,7 @@ public class EmailNotificationServiceImpl implements EmailNotificationService
             }
         });
     }
+
 
 
     private void validateEmailRequest(EmailRequest emailRequest) {
